@@ -45,8 +45,8 @@ class ArrayHandler(logging.Handler):
 # Init
 logs = []
 hdlr = ArrayHandler(logs)
-panasonic_viera.getLogger().setLevel(logging.DEBUG)
-panasonic_viera.getLogger().addHandler(hdlr)
+panasonic_viera._LOGGER.setLevel(logging.DEBUG)
+panasonic_viera._LOGGER.addHandler(hdlr)
 
 result = dict({'status': 0})
 
@@ -107,40 +107,28 @@ if not Version:
 
 # MAIN
 rc = panasonic_viera.RemoteControl(args.host if hasattr(args, 'host') else None)
-if hasattr(args, 'timeout') and args.timeout is not None and hasattr(rc, 'setTimeout'):
-    rc.setTimeout(args.timeout)
 
 try:
     if args.action == 'sendkey':
-        rc.sendKey(args.command)
+        rc.send_key(args.command)
         result['output'] = 'ok'
     elif args.action == 'render':
         if args.command == 'getVolume':
-            result['output'] = rc.getVolume()
+            result['output'] = rc.get_volume()
         if args.command == 'getMute':
-            result['output'] = rc.getMute()
+            result['output'] = rc.get_mute()
     elif args.action == 'set':
         if args.command == 'setVolume':
-            rc.setVolume(args.value)
+            rc.set_volume(args.value)
         if args.command == 'setMute':
-            rc.setMute(args.value)
-    elif args.action == 'find':
-        result['output'] = rc.find()
-    elif args.action == 'version':
-        if (args.instance == 'local'):
-            result['output'] = panasonic_viera.__version__
-        else:
-            result['output'] = panasonic_viera.getOnlineVersion()
-    elif args.action == 'informations' and Version and Version('1.1.0') <= Version(panasonic_viera.__version__):
-        result['output'] = rc.informations()
+            rc.set_mute(args.value)
     else:
-        raise panasonic_viera.RemoteControlException("L'action " + args.action + " n'est pas disponible.")
-except panasonic_viera.RemoteControlException as e:
+        raise Exception("L'action " + args.action + " n'est pas disponible.")
+except Exception as e:
     result['output'] = 'nok'
     result['status'] = 1
     result['error'] = str(e)
-    if getattr(e, "getCode", None) and callable(e.getCode):
-        result['error_code'] = e.getCode()
+    result['error_code'] = getattr(e, "getCode", None)
 
 logging.shutdown()
 result['log'] = logs
