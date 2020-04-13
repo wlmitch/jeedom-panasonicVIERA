@@ -18,7 +18,6 @@
 
 /* * ***************************Includes********************************* */
 require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
-require_once dirname(__FILE__) . '/../php/panasonicVIERAIptables.inc.php';
 
 
 class panasonicVIERA extends eqLogic {
@@ -31,15 +30,6 @@ class panasonicVIERA extends eqLogic {
     const KEY_MODEL = 'model';
     // name of the features configuration key
     const KEY_FEATURES = 'features';
-    /**
-     * this configuration key if a boolean that indicates if the mac
-     * address has been fetched by discovery or filled manually
-     */
-    const KEY_MAC_DISCOVERED = 'macaddress_discovered';
-    // configure wakeup behaviour
-    const KEY_WAKEUP = 'wakeup';
-    // configure wakeup command if previous set to 'cmd'
-    const KEY_WAKEUPCMD = 'wakeupcmd';
     // configure the increase steps of volumes actions
     const KEY_VOLUMESTEP = 'volume_step';
     // configure the color of buttons
@@ -55,22 +45,6 @@ class panasonicVIERA extends eqLogic {
         'multimedia' => 'Multimedia',
         'colors' => 'Couleurs',
         'others' => 'Autres'
-    ];
-
-    // The command template for WakeOnLan command
-    const TEMPLATE_CMD_WAKEUP = [
-        'name' => 'Wake UP',
-        'logicalId' => 'wakeup',
-        'type' => 'action',
-        'subType' => 'other',
-        'configuration' => [
-            'description' => 'Wakeup the TV',
-            'group' => 'basic',
-            'wakeup_type' => 'none',
-            'action' => 'wakeup',
-            'command' => 'none',
-            'autocreated' => true
-        ],
     ];
 
     // The mapping of erros messages with errors codes
@@ -137,14 +111,6 @@ class panasonicVIERA extends eqLogic {
         $return['log'] = 'panasonicVIERA_dependency';
         $return['progress_file'] = '/tmp/dependency_panasonicVIERA_in_progress';
         $return['state'] = 'ok';
-        $lib_version = self::getLibraryVersion('local');
-        $online_lib_version = self::getLibraryVersion('online');
-        if (is_null($lib_version)) {
-            $return['state'] = 'nok';
-        } else if (!is_null($online_lib_version) && version_compare($online_lib_version, $lib_version, '>')) {
-            $return['state'] = 'nok';
-        }
-        log::add('panasonicVIERA', 'debug', "dependency check, local : $lib_version, remote : $online_lib_version");
         return $return;
     }
 
@@ -157,100 +123,6 @@ class panasonicVIERA extends eqLogic {
         $cmd = 'sudo /bin/bash ' . dirname(__FILE__) . '/../../resources/install.sh';
         $cmd .= ' >> ' . log::getPathToLog('panasonicVIERA_dependency') . ' 2>&1 &';
         exec($cmd);
-    }
-
-    /**
-     * Return the specific health informations
-     *
-     * @return [array] an array with the following keys
-     *
-     */
-    public static function health() {
-        $healths = [];
-
-        /* LIBRARY HEALTH */
-        $health_lib = [
-            'advice' => '',
-            'result' => '',
-            'state' => true,
-            'test' => __('Version de la bibliothèque Python', __FILE__),
-        ];
-        $lib_local = self::getLibraryVersion('local');
-        $lib_online = self::getLibraryVersion('online');
-        if (version_compare($lib_online, $lib_local, '>')) {
-            $health_lib['state'] = false;
-            $health_lib['advice'] = __('Vous devriez relancer l\'installation des dépendances', __FILE__);
-            $health_lib['result'] = 'NOK';
-        } else {
-            $health_lib['result'] = 'OK';
-        }
-        $health_lib['result'] .= sprintf(' (Local = %s, Online = %s)', $lib_local, $lib_online);
-
-        $healths[] = $health_lib;
-        return $healths;
-    }
-
-    /**
-     * Return the version of the local panasonic viera library
-     *
-     * @param [string] the instance of version to check
-     * @return string|null
-     */
-    public static function getLibraryVersion($instance = 'local') {
-        // check lock key to prevent multiple run of the dscovery at the same time
-        $version = cache::byKey('panasonicVIERA__library_version_' . $instance)->getValue(null);
-        # try to fetch the asked version from cmdline
-        if ($version === null) {
-            log::add('panasonicVIERA', 'debug', 'fetch library version from 3rdparty');
-            try {
-                $lib_version = panasonicVIERA::execute3rdParty("panasonic_viera_adapter.py", ['version', "--$instance"]);
-            } catch (Exception $e) {
-                log::add('panasonicVIERA', 'debug', 'catch Exception from 3rdparty');
-                $lib_version = null;
-            }
-            if (!is_null($lib_version)) {
-                cache::set('panasonicVIERA__library_version', $lib_version, 60*60*24);
-                $version = $lib_version;
-            }
-        }
-        return $version;
-    }
-
-    /**
-     * Return the timeout value for standard TV commands
-     * @return [int] the timeout in seconds
-     */
-    public static function getConfigCommandTimeout() {
-        return config::byKey('command_timeout', 'panasonicVIERA', 2);
-    }
-
-    /**
-     * Return the broadcast ip address to use in magic packets
-     * @return [string] the ip address
-     */
-    public static function getConfigBroadcastIp() {
-        $ip = config::byKey('broadcast_ip', 'panasonicVIERA', '255.255.255.255');
-        if (!filter_var($ip, FILTER_VALIDATE_IP)) {
-            return null;
-        }
-        return $ip;
-    }
-
-    /**
-     * Return the timeout value for discovery commands
-     * @return [int] the discovery timeout in seconds
-     */
-    public static function getConfigDiscoveryTimeout() {
-        return config::byKey('discovery_timeout', 'panasonicVIERA', 3);
-    }
-
-    /**
-     * Return the timeout value for discovery commands
-     * @return [int] the discovery timeout in seconds
-     */
-    public static function getConfigDiscoveryIptables() {
-        $b = config::byKey('discovery_iptables', 'panasonicVIERA', false);
-        return boolval($b);
     }
 
     /**
@@ -325,129 +197,6 @@ class panasonicVIERA extends eqLogic {
         return $output;
     }
 
-    /**
-     * Entry point of TV network discovery function
-     *
-     * @return [array] an array which contains statistics about results
-     *    Theses keys are available
-     *       - updated the number of updated TVs
-     *       - created the number of created TVs
-     *       - total the total number of discovered TVs
-     */
-    public static function discoverNetwork() {
-        // check lock key to prevent multiple run of the dscovery at the same time
-        if (cache::byKey('panasonicVIERA__discover_lock')->getValue(false) == true) {
-            log::add('panasonicVIERA', 'debug', 'discovering already in progress');
-            throw new Exception(__('La découverte est déjà en cours. Si une erreur est survenue veuillez patientez quelques secondes.', __FILE__));
-        }
-        cache::set('panasonicVIERA__discover_lock', true, 30);
-
-        $result = [
-            'updated' => 0,
-            'created' => 0,
-            'total' => 0
-        ];
-        if (self::getConfigDiscoveryIptables()) {
-            log::add('panasonicVIERA', 'debug', 'open firewall for discovery');
-            panasonicVIERAIptables::executeIptables('insert');
-        }
-        log::add('panasonicVIERA', 'debug', 'run discovery command');
-        $discovered = self::execute3rdParty("panasonic_viera_adapter.py", ['--timeout', self::getConfigDiscoveryTimeout(), 'find'], 'discover');
-        if (self::getConfigDiscoveryIptables()) {
-            log::add('panasonicVIERA', 'debug', 'close firewall after discovery');
-            panasonicVIERAIptables::executeIptables('delete');
-        }
-        if (count($discovered)) {
-            log::add('panasonicVIERA', 'debug', 'found ' . count($discovered) . ' TV(s) on the network');
-            foreach ($discovered as $key => $tv) {
-                log::add('panasonicVIERA', 'debug', 'treat element ' . ($key + 1));
-                if (!isset($tv['address']) || is_null($tv['address']) || empty($tv['address'])) {
-                    throw new Exception(__('Missing address key in discovery answer from 3rd party', __FILE__));
-                }
-
-                $address = $tv['address'];
-                $mac = null;
-                if (isset($tv['mac']) && !empty($tv['mac']) ) {
-                    $mac = $tv['mac'];
-                    log::add('panasonicVIERA', 'debug', ' set mac address ' . $mac);
-                }
-                $uuid = isset($tv['computed']['uuid']) ? $tv['computed']['uuid'] : null;
-                $eq = null;
-
-                // try to find an existing cmd by the mac address
-                if (!is_null($mac) && !empty($mac)) {
-                    $eq = self::byLogicalId($mac, 'panasonicVIERA');
-                    log::add('panasonicVIERA', 'debug', sprintf("search existing equipment by mac address '%s'", $mac));
-                    if (is_object($eq)) {
-                        log::add('panasonicVIERA', 'debug', sprintf("found existing equipment %d by mac address '%s'", $eq->getId(), $mac));
-                    }
-                }
-
-                // try to find an existing cmd by the uuid
-                if (!is_object($eq) && !is_null($uuid) && !empty($uuid)) {
-                    log::add('panasonicVIERA', 'debug', sprintf("search existing equipment by uuid '%s'", $uuid));
-                    $search = self::byTypeAndSearhConfiguration('panasonicVIERA', sprintf('"%s":"%s"', self::KEY_UUID, $uuid));
-                    if (count($search)) {
-                        $eq = $search[0];
-                    }
-                    if (is_object($eq)) {
-                        log::add('panasonicVIERA', 'debug', sprintf("found existing equipment %d by uuid '%s'", $eq->getId(), $uuid));
-                    }
-                }
-
-                // if the search by uuid did not work use the ip address instead
-                if (!is_object($eq)) {
-                    log::add('panasonicVIERA', 'debug', sprintf("search existing equipment by address '%s'", $address));
-                    $search = self::byTypeAndSearhConfiguration('panasonicVIERA', sprintf('"%s":"%s"', self::KEY_ADDRESS, $address));
-                    if (count($search)) {
-                        $eq = $search[0];
-                    }
-                    if (is_object($eq)) {
-                        log::add('panasonicVIERA', 'debug', sprintf("found existing equipment %d by address '%s'", $eq->getId(), $address));
-                    }
-                }
-
-                // if no equipment exist with address and UUID, create one
-                if (!is_object($eq)) {
-                    $name = isset($tv['computed']['name']) ? $tv['computed']['name'] : $address;;
-                    log::add('panasonicVIERA', 'debug', sprintf('create new TV equipment with address \'%s\' and name : \'%s\'', $address, $name));
-                    $eq = new panasonicVIERA();
-                    $eq->setEqType_name('panasonicVIERA');
-                    $eq->setName($name);
-                    $result['created'] += 1;
-                } else {
-                    log::add('panasonicVIERA', 'debug', "update existing TV equipment");
-                    $result['updated'] += 1;
-                }
-                $result['total'] = $result['updated'] + $result['created'];
-
-                // update set eq settings
-                $eq->setIpAddress($address);
-                if (!is_null($mac) and !empty($mac)) {
-                    $eq->setMacAddress($mac);
-                    $eq->setConfiguration(self::KEY_MAC_DISCOVERED, true);
-                } else {
-                    $eq->setConfiguration(self::KEY_MAC_DISCOVERED, false);
-                }
-                // set uuid if available
-                if ( !is_null($uuid) and !empty($uuid) ) {
-                    $eq->setConfiguration(self::KEY_UUID, $uuid);
-                }
-                // set model if available
-                if ( isset($tv['computed']['model_number']) ) {
-                    $eq->setConfiguration(self::KEY_MODEL, $tv['computed']['model_number']);
-                }
-
-                if ( isset($tv['computed']) && is_array($tv['computed']) ) {
-                    $eq->setConfiguration(self::KEY_FEATURES, $tv['computed']);
-                }
-
-                $eq->save();
-            }
-        }
-        cache::getCache()->delete('panasonicVIERA__discover_lock');
-        return $result;
-    }
 
     /*     * *********************Méthodes d'instance************************* */
 
@@ -529,74 +278,10 @@ class panasonicVIERA extends eqLogic {
         }
     }
 
-    /*
-     * Create a equipment of external plugin type and return a command with wakeonlan ability
-     *
-     * @return integer : the id of the wakeonlan command
-     * @throw Exception in case where the wakeonlan command cannot be retireved
-     */
-    private function createWakeOnLAnEqLogic() {
-        if (! class_exists('networks') ) {
-            throw new Exception(__('Impossible de créer l\'equipement du plugin networks', __FILE__));
-        }
-        $mac = $this->getLogicalId();
-        $addr = $this->getIpAddress();
-        $eq = null;
-        if (is_null($mac) || empty($mac) || is_null($addr) || empty($addr)) {
-            throw new Exception(__('L\'adresse IP ou l\'adresse MAC est vide, l\'equipement WakeOnLan ne peut pas être crée', __FILE__));
-        }
-        log::add('panasonicVIERA', 'debug', sprintf('createWakeOnLAnEqLogic: create wol eqLogic for %s', $this->getConfiguration(self::KEY_ADDRESS)));
-
-        // use first mac address
-        log::add('panasonicVIERA', 'debug', sprintf("search existing networks equipment by mac '%s'", $mac));
-        $search = networks::byTypeAndSearhConfiguration('networks', sprintf('"mac":"%s"', $mac));
-        if (count($search)) {
-            $eq = $search[0];
-        }
-        if (is_object($eq)) {
-            log::add('panasonicVIERA', 'debug', sprintf("found existing networks equipment %d by mac '%s'", $eq->getId(), $mac));
-        }
-
-        // try to find an existing cmd by the uuid
-        if (!is_object($eq)) {
-            log::add('panasonicVIERA', 'debug', sprintf("search existing networks equipment by ip address '%s'", $addr));
-            $search = networks::byTypeAndSearhConfiguration('networks', sprintf('"ip":"%s"', $addr));
-            if (count($search)) {
-                $eq = $search[0];
-            }
-            if (is_object($eq)) {
-                log::add('panasonicVIERA', 'debug', sprintf("found existing equipment %d by ip address '%s'", $eq->getId(), $addr));
-            }
-        }
-
-        // if no equipment exist with address and UUID, create one
-        if (!is_object($eq)) {
-            log::add('panasonicVIERA', 'debug', sprintf('create new networks equipment with address \'%s\' and name : \'%s\'', $addr, $this->getName()));
-            $eq = new networks();
-            $eq->setEqType_name('networks');
-            $eq->setName($this->getName());
-        } else {
-            log::add('panasonicVIERA', 'debug', "update existing networks equipment");
-        }
-        //$eq->setObject_id($this->getObject_id());
-        $eq->setIsEnable(1);
-        $eq->setConfiguration('ip', $addr);
-        $eq->setConfiguration('mac', $mac);
-        $eq->setConfiguration('broadcastIP', $this->getConfigBroadcastIp());
-        $eq->save();
-
-        $wol_cmd = $eq->getCmd(null, 'wol');
-        if (!is_object($wol_cmd)) {
-            throw new Exception(__('Impossible de configurer la commande wol de l\'équipement WakeOnLan', __FILE__));
-        }
-        return $wol_cmd->getId();
-    }
-
     /*    Data manipulation function    */
 
     public function preInsert() {
         $this->setConfiguration(self::KEY_TRIGGER_ERRORS, false);
-        $this->setConfiguration(self::KEY_WAKEUP, 'none');
         $this->setConfiguration(self::KEY_VOLUMESTEP, 2);
         $this->setConfiguration(self::KEY_THEME, 'white');
     }
@@ -612,8 +297,6 @@ class panasonicVIERA extends eqLogic {
             throw new Exception(__('L\'adresse IP ne peut etre vide. Vous pouvez la trouver dans les paramètres de votre TV ou de votre routeur (box).', __FILE__));
         }
         $this->setIpAddress($addr);
-
-        $this->setMacAddress($this->getLogicalId());
     }
 
     public function postUpdate() {
@@ -637,39 +320,6 @@ class panasonicVIERA extends eqLogic {
                 $this->removeCommands($key);
             }
         }
-
-        switch ($this->getConfiguration(self::KEY_WAKEUP, 'none')) {
-            case 'wol':
-                if (! class_exists('networks') ) {
-                    $this->setConfiguration(self::KEY_WAKEUP, 'none');
-                    log::add('panasonicVIERA', 'info', __('Le plugin networks n\'est pas disponible, la configuration du reveil de la TV a été annuléé', __FILE__));
-                    break;
-                }
-                if ($this->getLogicalId() != '') {
-                    log::add('panasonicVIERA', 'debug', '=> preSave: add wakeonlan command for valid mac address');
-                    $cmd = self::TEMPLATE_CMD_WAKEUP;
-                    $cmd['configuration']['wakeup_type'] = $this->getConfiguration(self::KEY_WAKEUP, 'none');
-                    $cmd['configuration']['command'] = $this->createWakeOnLAnEqLogic();
-                    if (is_null($cmd['configuration']['command'])) {
-                        throw new Exception(__('La création de l\'equipement pour le WakeOnLan a échoué', __FILE__));
-                    }
-                    $this->addCommand($cmd, true);
-                }
-                break;
-            case 'cmd':
-                $cmd = self::TEMPLATE_CMD_WAKEUP;
-                $cmd['configuration']['wakeup_type'] = $this->getConfiguration(self::KEY_WAKEUP, 'none');
-                $cmd['configuration']['command'] = $this->getConfiguration(self::KEY_WAKEUPCMD);
-                $this->addCommand($cmd, true);
-                break;
-            case 'none':
-                $this->removeCommand(self::TEMPLATE_CMD_WAKEUP);
-                break;
-            default:
-                log::add('panasonicVIERA', 'error', "Bad value for ". self::KEY_WAKEUP . " configuration.");
-                break;
-        }
-
     }
 
     public function postSave() {
@@ -782,47 +432,6 @@ class panasonicVIERA extends eqLogic {
         return $this;
     }
 
-    /**
-     * Set the new mac address for this command
-     *
-     * @param string the new mac address
-     * @return this
-     * @throw Exception if mac address is not valid
-     */
-    public function setMacAddress($mac) {
-        // if mac is not empty validate it
-        if ( $mac != '' ) {
-            if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
-                log::add('panasonicVIERA', 'debug', '=> setMacAddress: mac address checking failure');
-                throw new Exception(__('Vous avez saisit une mauvaise adresse MAC', __FILE__). " '$mac'.");
-            }
-            $this->setLogicalId($mac);
-        } else {
-            //log::add('panasonicVIERA', 'debug', '=> setMacAddress: remove wakeup command because of empty mac address');
-            //$this->removeCommand(self::TEMPLATE_CMD_WAKEUP);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Return some devices informations
-     *
-     */
-    public function getDeviceInformations() {
-        $infos = self::execute3rdParty("panasonic_viera_adapter.py",
-                [ 'informations', $this->getIpAddress() ],
-                __FUNCTION__,
-                true,
-                self::PANASONIC_VIERA_LIB_ERRORS);
-        if (is_null($infos)) {
-            throw new Exception(__('La commande a retournée une valeur nulle, veuillez vérifier les dépendances et les log', __FILE__));
-        } elseif (!is_array($infos)) {
-            throw new Exception(__('La commande a retournée une mauvaise valeur, veuillez vérifier les dépendances et les log', __FILE__));
-        }
-        return $infos;
-    }
-
 }
 
 class panasonicVIERACmd extends cmd {
@@ -848,41 +457,14 @@ class panasonicVIERACmd extends cmd {
                     throw new Exception('Tried to execute a command with an empty command');
                 }
                 log::add('panasonicVIERA', 'debug', sprintf('execute: Action command : %s', $action));
-                switch ($action) {
-                    case 'wakeup':
-                        $wakeuptype = $this->getConfiguration('wakeup_type');
-                        log::add('panasonicVIERA', 'debug', sprintf('execute: WakeUp command type : %s', $wakeuptype));
-                        switch ($wakeuptype) {
-                            case 'wol':
-                                if (! class_exists('networks')) {
-                                    $panasonicTV->setConfiguration(self::KEY_WAKEUP, 'none');
-                                    $panasonicTV->save();
-                                    log::add('panasonicVIERA', 'error', __('Le plugin networks n\'est pas disponible, la configuration du reveil de la TV a été annuléé', __FILE__));
-                                }
-                            case 'cmd':
-                                $wakeup_cmd = cmd::byId(str_replace('#', '', $command));
-                                if (is_object($wakeup_cmd)) {
-                                    log::add('panasonicVIERA', 'info', sprintf('%s %s(%s)',
-                                            __('Execute la commande ', __FILE__), $wakeup_cmd->getName(), $wakeup_cmd->getId()));
-                                    $wakeup_cmd->execCmd();
-                                } else {
-                                    log::add('panasonicVIERA', 'error', __('Impossible d\'executer la commande ' . $command, __FILE__));
-                                }
-                                break;
-                        }
-                        break;
-                    default:
-                        $result = panasonicVIERA::execute3rdParty("panasonic_viera_adapter.py",
-                                ['--timeout', panasonicVIERA::getConfigCommandTimeout(), $action, $tvip, $command],
-                                $this->getName(),
-                                ($panasonicTV->getConfiguration(panasonicVIERA::KEY_TRIGGER_ERRORS, false) == true ? true : false),
-                                panasonicVIERA::PANASONIC_VIERA_LIB_ERRORS);
-                        if (is_null($result)) {
-                            throw new Exception(__('La commande a retournée une valeur nulle, veuillez vérifier les dépendances et les log', __FILE__));
-                        }
-                        break;
+                $result = panasonicVIERA::execute3rdParty("panasonic_viera_adapter.py",
+                        ['--timeout', panasonicVIERA::getConfigCommandTimeout(), $action, $tvip, $command],
+                        $this->getName(),
+                        ($panasonicTV->getConfiguration(panasonicVIERA::KEY_TRIGGER_ERRORS, false) == true ? true : false),
+                        panasonicVIERA::PANASONIC_VIERA_LIB_ERRORS);
+                if (is_null($result)) {
+                    throw new Exception(__('La commande a retournée une valeur nulle, veuillez vérifier les dépendances et les log', __FILE__));
                 }
-
                 break;
             case 'info':
                 log::add('panasonicVIERA', 'debug', 'Info command');
