@@ -1,21 +1,11 @@
+#!/bin/bash
+
 touch /tmp/dependancy_panasonicVIERA_in_progress
 echo "Launch install of PanasonicViera dependancy"
 
-echo 10 > /tmp/dependancy_panasonicVIERA_in_progress
-echo 'Download panasonic-viera library'
-cd /tmp
-sudo rm -R /tmp/panasonic-viera >/dev/null 2>&1
-git clone https://github.com/Turgon37/panasonic-viera.git
-
 echo 50 > /tmp/dependancy_panasonicVIERA_in_progress
 echo 'Install panasonic-viera library'
-cd /tmp/panasonic-viera
-echo 'y' | sudo pip --quiet uninstall panasonic_viera
-sudo python setup.py install
-
-echo 95 > /tmp/dependancy_panasonicVIERA_in_progress
-echo 'Cleaning...'
-sudo rm -R /tmp/panasonic-viera >/dev/null 2>&1
+pip3 install panasonic-viera
 
 echo 100 > /tmp/dependancy_panasonicVIERA_in_progress
 echo "Everything is successfully installed!"
