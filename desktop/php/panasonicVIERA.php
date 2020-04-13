@@ -23,13 +23,7 @@ $eqLogics = eqLogic::byType('panasonicVIERA');
     <div class="col-lg-10 col-md-9 col-sm-8 eqLogicThumbnailDisplay" style="border-left: solid 1px #EEE; padding-left: 25px;">
         <legend><i class="fa fa-cog"></i>  {{Gestion}}</legend>
         <div class="eqLogicThumbnailContainer">
-            <div class="cursor discoverTVs include card" data-mode="1" data-state="1" style="background-color : #ffffff; height : 140px;margin-bottom : 10px;padding : 5px;border-radius: 2px;width : 160px;margin-left : 10px;" >
-                <center class="includeicon">
-                    <i class="fa fa-bullseye" style="font-size : 6em;color:#94ca02;"></i>
-                </center>
-                <span style="font-size : 1.1em;position:relative; top : 15px;word-break: break-all;white-space: pre-wrap;word-wrap: break-word;color:#94ca02"><center>{{Découvrir les TVs sur le réseau}}</center></span>
-            </div>
-        	<div class="cursor eqLogicAction" data-action="gotoPluginConf" style="background-color : #ffffff; height : 120px;margin-bottom : 10px;padding : 5px;border-radius: 2px;width : 160px;margin-left : 10px;">
+            <div class="cursor eqLogicAction" data-action="gotoPluginConf" style="background-color : #ffffff; height : 120px;margin-bottom : 10px;padding : 5px;border-radius: 2px;width : 160px;margin-left : 10px;">
          		<center>
            			<i class="fa fa-wrench" style="font-size : 6em;color:#767676;"></i>
          		</center>
@@ -62,7 +56,6 @@ $eqLogics = eqLogic::byType('panasonicVIERA');
     <a class="btn btn-success eqLogicAction pull-right" data-action="save"><i class="fa fa-check-circle"></i> {{Sauvegarder}}</a>
         <a class="btn btn-danger eqLogicAction pull-right" data-action="remove"><i class="fa fa-minus-circle"></i> {{Supprimer}}</a>
         <a class="btn btn-default eqLogicAction pull-right" data-action="configure"><i class="fa fa-cogs"></i> {{Configuration avancée}}</a>
-        <a class="btn btn-info expertModeVisible pull-right" id="bt_informationsModal"><i class="fa fa-microchip"></i> {{Informations brutes}}</a>
         <ul class="nav nav-tabs" role="tablist">
             <li role="presentation"><a href="#" class="eqLogicAction" aria-controls="home" role="tab" data-toggle="tab" data-action="returnToThumbnailDisplay"><i class="fa fa-arrow-circle-left"></i></a></li>
             <li role="presentation" class="active"><a href="#eqlogictab" aria-controls="home" role="tab" data-toggle="tab"><i class="fa fa-tachometer"></i> {{Equipement}}</a></li>
@@ -126,16 +119,6 @@ $eqLogics = eqLogic::byType('panasonicVIERA');
                                 <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="<?= panasonicVIERA::KEY_ADDRESS ?>" placeholder="{{IP Address}}"/>
                             </div>
                         </div>
-                        <div id="div_macaddress" class="form-group">
-                            <label class="col-sm-3 control-label">{{Adresse MAC (uniquement pour le WakeUp)}}</label>
-                            <div class="col-lg-2 col-sm-5">
-                                <input type="text" class="eqLogicAttr form-control" id="in_macdiscovered" data-l1key="configuration" data-l2key="<?= panasonicVIERA::KEY_MAC_DISCOVERED ?>" style="display : none;" />
-                                <input type="text" class="eqLogicAttr form-control" title="{{L'adresse MAC a été récupérée via la découverte}}" data-l1key="logicalId" placeholder="{{TV's MAC address}}" />
-                            </div>
-                            <div class="col-lg-1 col-sm-1">
-                                <a href="#" class="btn btn-primary" id="a_macaddressHelper" style="display: none;" title="{{L'adresse MAC a été récupérée via la découverte}}"><i class="fa fa fa-question-circle"></i></a>
-                            </div>
-                        </div>
                         <div class="form-group">
                             <label class="col-sm-3 control-label" >{{Affichage des groupes de commandes}}</label>
                             <div class="col-sm-9">
@@ -167,25 +150,6 @@ $eqLogics = eqLogic::byType('panasonicVIERA');
                                 </select>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label">{{Mode de réveil de la TV}}</label>
-                            <div class="col-sm-2">
-                                <select class="eqLogicAttr form-control" id="sl_wakeup" data-l1key='configuration' data-l2key='<?= panasonicVIERA::KEY_WAKEUP ?>'>
-                                    <option selected="selected" value='none'>{{Pas de commande de réveil}}</option>
-<?php if (class_exists('networks') ) : ?>
-                                    <option value='wol'>{{Utiliser le WakeOnLan (via networks)}}</option>
-<?php endif; ?>
-                                    <option value='cmd'>{{Utiliser une commande d'action}}</option>
-                                </select>
-                            </div>
-                            <div id="div_wakeupCmd" class="col-sm-3">
-                                <div class="input-group">
-                                    <input id="in_wakeupCmd" class="form-control eqLogicAttr" data-l1key="configuration" data-l2key="<?= panasonicVIERA::KEY_WAKEUPCMD ?>">
-                                    <span class="input-group-btn"><a id="bt_wakeupCmd" class="btn btn-default btn-success"><i class="fa fa-list-alt"></i></a></span>
-                                </div>
-
-                            </div>
-                        </div>
                         <div class="form-group expertModeVisible">
                             <label class="col-sm-3 control-label" >{{Remonter les erreurs d'execution des commandes}}</label>
                             <div class="col-sm-9">
@@ -195,22 +159,6 @@ $eqLogics = eqLogic::byType('panasonicVIERA');
                			</div>
                     </fieldset>
                 </form>
-            </div>
-            <div role="tabpanel" class="tab-pane" id="featuretab">
-                <legend><i class="fa fa-arrow-circle-left eqLogicAction cursor" data-action="returnToThumbnailDisplay"></i> {{Caractéristiques}}</legend>
-                <div class="alert alert-info">
-                    {{Info : <br /> Les informations suivantes sont des caractéristiques de la télévision qui ont pu être relevées lors de la découverte<br />Pour la plupart, elles sont en anglais car l'interface de communication avec la Télévision fonctionne dans cette langue}}
-                </div>
-                <table id="table_features" class="table table-responsive">
-                    <thead>
-                        <tr>
-                            <th>{{Nom de la caractéristique}}</th>
-                            <th>{{Valeur}}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
             </div>
             <div role="tabpanel" class="tab-pane" id="commandtab">
                 <legend><i class="fa fa-arrow-circle-left eqLogicAction cursor" data-action="returnToThumbnailDisplay"></i> {{Commandes}}</legend>

@@ -18,22 +18,3 @@
 
 jeedom.panasonicVIERA = function() {
 };
-
-jeedom.panasonicVIERA.informations = function(_params) {
-    var paramsRequired = ['id'];
-    var paramsSpecifics = {};
-    try {
-        jeedom.private.checkParamsRequired(_params || {}, paramsRequired);
-    } catch (e) {
-        (_params.error || paramsSpecifics.error || jeedom.private.default_params.error)(e);
-        return;
-    }
-    var params = $.extend({}, jeedom.private.default_params, paramsSpecifics, _params || {});
-    var paramsAJAX = jeedom.private.getParamsAJAX(params);
-    paramsAJAX.url = 'plugins/panasonicVIERA/core/ajax/panasonicVIERA.ajax.php';
-    paramsAJAX.data = {
-        id: _params.id,
-        action: 'getDeviceInformations'
-    };
-    $.ajax(paramsAJAX);
-}

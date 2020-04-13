@@ -19,12 +19,6 @@
  * GLOBAL VIEW
  */
 
-// register event for discover button
-$('.discoverTVs').on('click', function () {
-    discoverTVs();
-});
-
-
 /*
  * EQUIPMENT VIEW
  */
@@ -49,21 +43,6 @@ function printEqLogic(_eqLogic) {
             $('#div_inputGroupName').removeClass('input-group');
             $('#span_setName').hide();
         }
-
-        if (isset(_eqLogic.configuration.macaddress_discovered)) {
-            // lock the mac address field on certains conditions
-            var inputMacAddress = $('.eqLogicAttr[data-l1key=logicalId]');
-            if (_eqLogic.configuration.macaddress_discovered) {
-                inputMacAddress.prop("disabled", true);
-                $('#div_macaddress').addClass('expertModeVisible');
-                $('#a_macaddressHelper').show();
-            } else {
-                inputMacAddress.prop("disabled", false);
-                $('#div_macaddress').removeClass('expertModeVisible');
-                $('#a_macaddressHelper').hide();
-            }
-        };
-
     }
 }
 
@@ -85,32 +64,6 @@ function addFeature(name, value) {
 //    </div>
 //</div>
 }
-
-$('#bt_informationsModal').on('click', function () {
-     $('#md_modal').dialog({title: "{{Informations (brutes) à propos de la Télévision}}"});
-     $('#md_modal').load('index.php?v=d&plugin=panasonicVIERA&modal=informations&id=' + $('.eqLogicAttr[data-l1key=id]').value()).dialog('open');
-});
-
-// load the command toolkit into the command field
-$('#bt_wakeupCmd').on('click', function () {
-     jeedom.cmd.getSelectModal({cmd: {type: 'action'}}, function (result) {
-         $('#in_wakeupCmd').atCaret('insert', result.human);
-     });
- });
-
-// update the form according to wake up selection
-$('#sl_wakeup').change(function() {
-    switch($('#sl_wakeup').value()) {
-    case 'cmd':
-        $('#div_wakeupCmd').show();
-        break;
-    case 'none':
-        $('#table_cmd').find('.cmdAttr[data-l1key=logicalId]').filter(function() { return this.value == 'wakeup' }).closest('tr').remove();
-    default:
-        $('#div_wakeupCmd').hide();
-    }
-});
-
 
 $("#table_cmd").sortable({axis: "y", cursor: "move", items: ".cmd", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 
@@ -176,37 +129,4 @@ function addCmdToTable(_cmd) {
         }
         jeedom.cmd.changeType($('#table_cmd tbody tr:last'), init(_cmd.subType));
     }
-}
-
-function discoverTVs() {
-    $.ajax({// fonction permettant de faire de l'ajax
-        type: "POST", // methode de transmission des données au fichier php
-        url: "plugins/panasonicVIERA/core/ajax/panasonicVIERA.ajax.php", // url du fichier php
-        data: {
-            action: "discoverTVs",
-        },
-        dataType: 'json',
-        error: function (request, status, error) {
-            handleAjaxError(request, status, error);
-        },
-        success: function (data) { // si l'appel a bien fonctionné
-            if (data.state != 'ok') {
-                $('#div_alert').showAlert({message: data.result, level: 'danger'});
-                return;
-            }
-
-            if (data.result.total === 0) {
-                $('#div_scanAlert').showAlert({
-                    message: '{{Aucune TV détéctée.<br \/>Vérifier que la TV est bien allumée et vérifier les règles d\'entrées du pare feu. Si nécessaire, activer l\'option Iptables dans la configuration du plugin.}}',
-                    level: 'info'
-                });
-            } else {
-                $('#div_scanAlert').showAlert({
-                    message: [data.result.total, '{{TV(s) découverte(s) dont}}', data.result.created, '{{TV(s) crée(s) et}}', data.result.updated, '{{TV(s) mise(s) à jour.<br \/>La page va se recharger dans 2 secondes.}}', ].join(' '),
-                    level: 'success'
-                });
-                setTimeout(window.location.reload.bind(window.location), 2000);
-            }
-        }
-    });
 }
