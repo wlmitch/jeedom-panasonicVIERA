@@ -125,7 +125,7 @@ class panasonicVIERA extends eqLogic {
     }
 
     /**
-     * Return the dependancy info about this plugin
+     * Return the dependency info about this plugin
      *
      * @return [array] an array with the following keys
      *    log : the name of the log file
@@ -134,8 +134,8 @@ class panasonicVIERA extends eqLogic {
      */
     public static function dependancy_info() {
         $return = array();
-        $return['log'] = 'panasonicVIERA_dependancy';
-        $return['progress_file'] = '/tmp/dependancy_panasonicVIERA_in_progress';
+        $return['log'] = 'panasonicVIERA_dependency';
+        $return['progress_file'] = '/tmp/dependency_panasonicVIERA_in_progress';
         $return['state'] = 'ok';
         $lib_version = self::getLibraryVersion('local');
         $online_lib_version = self::getLibraryVersion('online');
@@ -153,9 +153,9 @@ class panasonicVIERA extends eqLogic {
      *
      */
     public static function dependancy_install() {
-        log::remove('panasonicVIERA_dependancy');
+        log::remove('panasonicVIERA_dependency');
         $cmd = 'sudo /bin/bash ' . dirname(__FILE__) . '/../../resources/install.sh';
-        $cmd .= ' >> ' . log::getPathToLog('panasonicVIERA_dependancy') . ' 2>&1 &';
+        $cmd .= ' >> ' . log::getPathToLog('panasonicVIERA_dependency') . ' 2>&1 &';
         exec($cmd);
     }
 
