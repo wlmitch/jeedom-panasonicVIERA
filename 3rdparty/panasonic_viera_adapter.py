@@ -106,9 +106,15 @@ if not Version:
     logs.append(dict(level='WARNING', message='La bibliothèque packaging.version n\'est pas disponible. Certaines fonctionalités risque de ne pas être disponibles'))
 
 # MAIN
-rc = panasonic_viera.RemoteControl(args.host if hasattr(args, 'host') else None)
-
 try:
+    if hasattr(args, 'host'):
+        if hasattr(args, 'app_id') & hasattr(args, 'encryption_key'):
+            rc = panasonic_viera.RemoteControl(host=args.host, app_id=args.app_id, encryption_key=args.encryption_key)
+        else:
+            rc = panasonic_viera.RemoteControl(host=args.host)
+    else:
+        raise Exception("host must be defined")
+
     if args.action == 'sendkey':
         rc.send_key(args.command)
         result['output'] = 'ok'
@@ -122,6 +128,13 @@ try:
             rc.set_volume(args.value)
         if args.command == 'setMute':
             rc.set_mute(args.value)
+    elif args.action == 'pin':
+        rc.request_pin_code()
+        result['output'] = 'ok'
+    elif args.action == 'sendpin':
+        rc.authorize_pin_code(pincode=args.value)
+        result['app_id'] = rc._app_id
+        result['enc_key'] = rc._enc_key
     else:
         raise Exception("L'action " + args.action + " n'est pas disponible.")
 except Exception as e:
