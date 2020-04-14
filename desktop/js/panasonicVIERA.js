@@ -130,3 +130,7 @@ function addCmdToTable(_cmd) {
         jeedom.cmd.changeType($('#table_cmd tbody tr:last'), init(_cmd.subType));
     }
 }
+
+$('#bt_pin').on('click', function() {
+	alert('PIN REQUEST !')
+})

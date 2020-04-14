@@ -24,10 +24,10 @@ class panasonicVIERA extends eqLogic {
 
     // name of ip address configuration key
     const KEY_ADDRESS = 'address';
+    const KEY_APP_ID = 'app_id';
+    const KEY_ENC_KEY = 'enc_key';
     // name of uuid configuration key
     const KEY_UUID = 'uuid';
-    // name of model configuration key
-    const KEY_MODEL = 'model';
     // name of the features configuration key
     const KEY_FEATURES = 'features';
     // configure the increase steps of volumes actions

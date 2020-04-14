@@ -5,8 +5,6 @@ if (!isConnect('admin')) {
 sendVarToJS('eqType', 'panasonicVIERA');
 $eqLogics = eqLogic::byType('panasonicVIERA');
 ?>
-<div id="div_scanAlert">
-</div>
 <div class="row row-overflow">
     <div class="col-lg-2 col-md-3 col-sm-4">
         <div class="bs-sidebar">
@@ -53,7 +51,7 @@ $eqLogics = eqLogic::byType('panasonicVIERA');
     </div>
 
     <div class="col-lg-10 col-md-9 col-sm-8 eqLogic" style="border-left: solid 1px #EEE; padding-left: 25px;display: none;">
-    <a class="btn btn-success eqLogicAction pull-right" data-action="save"><i class="fa fa-check-circle"></i> {{Sauvegarder}}</a>
+        <a class="btn btn-success eqLogicAction pull-right" data-action="save"><i class="fa fa-check-circle"></i> {{Sauvegarder}}</a>
         <a class="btn btn-danger eqLogicAction pull-right" data-action="remove"><i class="fa fa-minus-circle"></i> {{Supprimer}}</a>
         <a class="btn btn-default eqLogicAction pull-right" data-action="configure"><i class="fa fa-cogs"></i> {{Configuration avancée}}</a>
         <ul class="nav nav-tabs" role="tablist">
@@ -66,19 +64,15 @@ $eqLogics = eqLogic::byType('panasonicVIERA');
             <div role="tabpanel" class="tab-pane active" id="eqlogictab">
                 <form class="form-horizontal">
                     <fieldset>
-                        <legend><i class="fa fa-arrow-circle-left eqLogicAction cursor" data-action="returnToThumbnailDisplay"></i> {{Général}}  <i class='fa fa-cogs eqLogicAction pull-right cursor expertModeVisible' data-action='configure'></i></legend>
+                        <legend><i class="fa fa-arrow-circle-left eqLogicAction cursor" data-action="returnToThumbnailDisplay"></i> {{Général}}</legend>
                         <div class="form-group">
-                            <label class="col-sm-3 control-label">{{Nom de la TV}}</label>
+                            <label class="col-sm-3 control-label">{{Nom}}</label>
                             <input type="text" class="eqLogicAttr form-control" data-l1key="id" style="display : none;" />
                             <div class="col-sm-3">
                                 <div id="div_inputGroupName" class="">
                                     <input type="text" class="eqLogicAttr form-control" data-l1key="name" placeholder="{{TV's name}}"/>
                                     <span id="span_setName" class="input-group-btn" title="Remplir le nom automatiquement via la valeur récupérée de la TV" style="display : none;"><a id="bt_setName" class="btn btn-default btn-success"><i class="fa fa-magic"></i></a></span>
                                 </div>
-                            </div>
-                            <label class="col-sm-3 control-label expertModeVisible">{{Modèle}}</label>
-                            <div class="col-lg-2 col-sm-5 expertModeVisible">
-                                <span class="eqLogicAttr label label-primary" data-l1key="configuration" data-l2key="<?= panasonicVIERA::KEY_MODEL ?>" style="font-size : 1em;"></span>
                             </div>
                         </div>
                         <div class="form-group">
@@ -93,7 +87,7 @@ $eqLogics = eqLogic::byType('panasonicVIERA');
                         	</div>
                    		</div>
                         <div class="form-group">
-                            <label class="col-sm-3 control-label">{{Categorie de la TV}}</label>
+                            <label class="col-sm-3 control-label">{{Categorie}}</label>
                             <div class="col-sm-8 col-lg-8">
     <?php foreach (jeedom::getConfiguration('eqLogic:category') as $key => $value) : ?>
                                 <label class="checkbox-inline">
@@ -117,6 +111,18 @@ $eqLogics = eqLogic::byType('panasonicVIERA');
                             <label class="col-sm-3 control-label">{{Adresse IP}}</label>
                             <div class="col-lg-2 col-sm-5">
                                 <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="<?= panasonicVIERA::KEY_ADDRESS ?>" placeholder="{{IP Address}}"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">{{Chiffrement}}</label>
+                            <div class="col-lg-2 col-sm-5">
+                                <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="<?= panasonicVIERA::KEY_APP_ID ?>" placeholder="{{Identifiant}}"/>
+                            </div>
+                            <div class="col-lg-2 col-sm-5">
+                                <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="<?= panasonicVIERA::KEY_ENC_KEY ?>" placeholder="{{Clé}}"/>
+                            </div>
+                            <div class="col-lg-1 col-sm-1">
+                                <button id="bt_pin" type="button" class="btn btn-sm btn-success">{{Créer une clé}}</button>
                             </div>
                         </div>
                         <div class="form-group">
