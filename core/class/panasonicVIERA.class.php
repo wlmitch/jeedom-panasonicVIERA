@@ -126,7 +126,7 @@ class panasonicVIERA extends eqLogic {
     }
 
     public function execute($cmd) {
-        panasonicVIERA::execute3rdParty(
+        return panasonicVIERA::execute3rdParty(
             [
                 $cmd->getConfiguration('action'),
                 $this->getIpAddress(),
