@@ -157,7 +157,7 @@ class panasonicVIERA extends eqLogic {
         $runtime = 'bash';
         switch ($extension) {
             case 'py':
-                $runtime = 'python';
+                $runtime = 'python3';
                 break;
         }
 
