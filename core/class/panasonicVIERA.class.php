@@ -125,6 +125,20 @@ class panasonicVIERA extends eqLogic {
         exec($cmd);
     }
 
+    public function execute($cmd) {
+        panasonicVIERA::execute3rdParty(
+            [
+                $cmd->getConfiguration('action'),
+                $this->getIpAddress(),
+                $this->getAppId(),
+                $this->getEncKey(),
+                $cmd->getConfiguration('command')
+            ],
+            $cmd->getName(),
+            $this->getConfiguration(panasonicVIERA::KEY_TRIGGER_ERRORS, false) == true ? true : false
+        );
+    }
+
     /**
      * Execute a 3rd party command not written in PHP
      *
@@ -135,7 +149,9 @@ class panasonicVIERA extends eqLogic {
      * @return mixed : the output of the command (stdout of the command)
      * @throw Exception in case of failure
      */
-    public static function execute3rdParty($command, $args = [], $name = null, $throw_errors = true, $error_codes = []) {
+    public static function execute3rdParty($args = [], $name = null, $throw_errors = true) {
+        $error_codes = panasonicVIERA::PANASONIC_VIERA_LIB_ERRORS;
+        $command = "panasonic_viera_adapter.py";
         $base_path = realpath(__DIR__ . '/../../3rdparty');
         $extension = pathinfo($command, PATHINFO_EXTENSION);
         $runtime = 'bash';
@@ -415,6 +431,12 @@ class panasonicVIERA extends eqLogic {
     public function getIpAddress() {
         return $this->getConfiguration(panasonicVIERA::KEY_ADDRESS);
     }
+    public function getAppId() {
+        return $this->getConfiguration(panasonicVIERA::KEY_APP_ID);
+    }
+    public function getEncKey() {
+        return $this->getConfiguration(panasonicVIERA::KEY_ENC_KEY);
+    }
 
     /**
      * Set the new ip address for this command
@@ -444,8 +466,6 @@ class panasonicVIERACmd extends cmd {
     /*     * *********************Methode d'instance************************* */
     public function execute($_options = array()) {
         $panasonicTV = $this->getEqLogic();
-        $tvip = $panasonicTV->getIpAddress();
-
         switch($this->getType()) {
             case 'action':
                 $action = $this->getConfiguration('action');
@@ -457,24 +477,14 @@ class panasonicVIERACmd extends cmd {
                     throw new Exception('Tried to execute a command with an empty command');
                 }
                 log::add('panasonicVIERA', 'debug', sprintf('execute: Action command : %s', $action));
-                $result = panasonicVIERA::execute3rdParty("panasonic_viera_adapter.py",
-                        ['--timeout', panasonicVIERA::getConfigCommandTimeout(), $action, $tvip, $command],
-                        $this->getName(),
-                        ($panasonicTV->getConfiguration(panasonicVIERA::KEY_TRIGGER_ERRORS, false) == true ? true : false),
-                        panasonicVIERA::PANASONIC_VIERA_LIB_ERRORS);
+                $result = $panasonicTV->execute($this);
                 if (is_null($result)) {
                     throw new Exception(__('La commande a retournée une valeur nulle, veuillez vérifier les dépendances et les log', __FILE__));
                 }
                 break;
             case 'info':
                 log::add('panasonicVIERA', 'debug', 'Info command');
-                $action = $this->getConfiguration('action');
-                $command = $this->getConfiguration('command');
-                return panasonicVIERA::execute3rdParty("panasonic_viera_adapter.py",
-                        ['--timeout', panasonicVIERA::getConfigCommandTimeout(), $action, $tvip, $command],
-                        $this->getName(),
-                        ($panasonicTV->getConfiguration(panasonicVIERA::KEY_TRIGGER_ERRORS, false) == true ? true : false),
-                        panasonicVIERA::PANASONIC_VIERA_LIB_ERRORS);
+                return $result = $panasonicTV->execute($this);
             default:
                 throw new Exception(sprintf('Tried to execute an unknown command type : %s', $this->getType()));
         }
