@@ -753,6 +753,50 @@ return [
         ],
         'type' => 'info',
         'subType' => 'binary',
+    ],
+    [
+        'name' => 'HDMI 1',
+        'configuration' => [
+            'action' => 'sendkey',
+            'command' => 'NRC_HDMI1-ONOFF',
+            'description' => 'HDMI 1',
+            'group' => 'others'
+        ],
+        'type' => 'action',
+        'subType' => 'other'
+    ],
+    [
+        'name' => 'HDMI 2',
+        'configuration' => [
+            'action' => 'sendkey',
+            'command' => 'NRC_HDMI2-ONOFF',
+            'description' => 'HDMI 2',
+            'group' => 'others'
+        ],
+        'type' => 'action',
+        'subType' => 'other'
+    ],
+    [
+        'name' => 'HDMI 3',
+        'configuration' => [
+            'action' => 'sendkey',
+            'command' => 'NRC_HDMI3-ONOFF',
+            'description' => 'HDMI 3',
+            'group' => 'others'
+        ],
+        'type' => 'action',
+        'subType' => 'other'
+    ],
+    [
+        'name' => 'HDMI 4',
+        'configuration' => [
+            'action' => 'sendkey',
+            'command' => 'NRC_HDMI4-ONOFF',
+            'description' => 'HDMI 4',
+            'group' => 'others'
+        ],
+        'type' => 'action',
+        'subType' => 'other'
     ]
 ];
 ?>
