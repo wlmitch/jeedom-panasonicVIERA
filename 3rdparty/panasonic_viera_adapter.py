@@ -115,9 +115,9 @@ try:
             result['output'] = rc.get_mute()
     elif args.action == 'set':
         if args.command == 'setVolume':
-            rc.set_volume(args.value)
+            rc.set_volume(int(args.value))
         if args.command == 'setMute':
-            rc.set_mute(args.value)
+            rc.set_mute(bool(args.value))
     elif args.action == 'pin':
         rc.request_pin_code()
         result['output'] = 'ok'
