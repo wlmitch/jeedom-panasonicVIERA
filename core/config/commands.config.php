@@ -797,6 +797,17 @@ return [
         ],
         'type' => 'action',
         'subType' => 'other'
+    ],
+    [
+        'name' => 'Viera Link',
+        'configuration' => [
+            'action' => 'sendkey',
+            'command' => 'NRC_VIERA_LINK-ONOFF',
+            'description' => 'Viera Link',
+            'group' => 'others'
+        ],
+        'type' => 'action',
+        'subType' => 'other'
     ]
 ];
 ?>
