@@ -5,7 +5,7 @@ echo 'Launch install of PanasonicViera dependency'
 
 echo 50 > /tmp/dependency_panasonicVIERA_in_progress
 echo 'Install panasonic-viera library'
-pip3 install panasonic-viera
+pip3 install panasonic-viera aiohttp
 
 echo 100 > /tmp/dependency_panasonicVIERA_in_progress
 echo 'Everything is successfully installed!'
